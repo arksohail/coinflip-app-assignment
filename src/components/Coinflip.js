@@ -9,6 +9,7 @@ const Coinflip = () => {
     const [choice, setChoice] = useState('Heads');
     const [result, setResult] = useState('');
     const [balance, setBalance] = useState('');
+    const [isFlipping, setIsFlipping] = useState(false);
 
     const contractAddress = '0x8AD85C173519734cB33dBE4306274333F569635c';
     const contractABI = [
@@ -44,6 +45,7 @@ const Coinflip = () => {
 
     const flipCoin = async () => {
         if (contract && betAmount) {
+            setIsFlipping(true); 
             const choiceIndex = choice === 'Heads' ? 0 : 1;
             try {
                 const tx = await contract.flip(choiceIndex, {
@@ -73,24 +75,26 @@ const Coinflip = () => {
                 // console.log(err)
                 // console.log(err.message)
                 setResult('Error: ' + error.message);
+            } finally {
+                setIsFlipping(false);
             }
         } else {
             alert('Please connect wallet and enter bet amount.');
         }
     };
 
-    const getContractBalance = async () => {
-        if (contract) {
-            try {
-                // Call getBalance method
-                const balance = await contract.getBalance();
-                setBalance(ethers.formatEther(balance)); // Convert from Wei to Ether
-            } catch (error) {
-                // console.error('Error fetching balance:', error);
-                setBalance('Error fetching balance');
-            }
-        }
-    };
+    // const getContractBalance = async () => {
+    //     if (contract) {
+    //         try {
+    //             // Call getBalance method
+    //             const balance = await contract.getBalance();
+    //             setBalance(ethers.formatEther(balance)); // Convert from Wei to Ether
+    //         } catch (error) {
+    //             // console.error('Error fetching balance:', error);
+    //             setBalance('Error fetching balance');
+    //         }
+    //     }
+    // };
 
     return (
         <div className="container">
@@ -128,7 +132,12 @@ const Coinflip = () => {
                                 Tails
                             </label>
                         </div>
-                        <button className="flip-button" onClick={flipCoin}>Flip Coin</button>
+                        <button className="flip-button" onClick={flipCoin} disabled={isFlipping}>
+                            {isFlipping ? 'Flipping...' : 'Flip Coin'}
+                        </button>
+                        <div className={`coin-container ${isFlipping ? 'flipping' : ''}`}>
+                            <img src="../images/coin.png" alt="Crypto Coin" className="coin" />
+                        </div>
                         <p className="result-message">{result}</p>
                     </div>
                 )}
